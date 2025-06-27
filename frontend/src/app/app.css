@@ -1,0 +1,361 @@
+/* Global styles for the search app */
+.search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--mobius-light-teal) 0%, var(--mobius-white) 100%);
+  min-height: 100vh;
+}
+
+/* Header styles */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--mobius-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header .logo {
+  height: 80px;
+  margin-bottom: 1rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+/* Search section */
+.search-section {
+  margin-bottom: 2rem;
+}
+
+.search-box {
+  display: flex;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.search-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #6b7280;
+}
+
+.search-button {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--mobius-teal) 0%, var(--mobius-navy) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.search-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.4);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Results section */
+.results-section {
+  margin-top: 2rem;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  color: var(--mobius-navy);
+  padding: 2rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 4px solid rgba(32, 178, 170, 0.3);
+  border-top: 4px solid var(--mobius-teal);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Results */
+.results {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.results h2 {
+  color: var(--mobius-navy);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.result-item {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mobius-border);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.result-item:hover {
+  background-color: var(--mobius-light-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.1);
+}
+
+.result-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.result-thumbnail {
+  flex-shrink: 0;
+}
+
+.book-placeholder {
+  width: 60px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--mobius-teal), var(--mobius-navy));
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-item h3 {
+  color: var(--mobius-navy);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1.4;
+}
+
+.result-item h3:hover {
+  color: var(--mobius-teal);
+}
+
+.result-item .label {
+  font-weight: 600;
+  color: var(--mobius-soft-navy);
+}
+
+.result-item .author {
+  color: var(--mobius-text-secondary);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.publication-info {
+  color: var(--mobius-text-secondary);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.separator {
+  margin: 0 0.5rem;
+  color: var(--mobius-teal);
+}
+
+.identifier {
+  color: var(--mobius-text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.subjects {
+  margin: 0.75rem 0;
+}
+
+.subject-tag {
+  display: inline-block;
+  background: var(--mobius-light-teal);
+  color: var(--mobius-navy);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--mobius-teal);
+}
+
+.more-subjects {
+  color: var(--mobius-teal);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.description {
+  color: var(--mobius-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0.75rem 0;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--mobius-border);
+}
+
+.result-item .score {
+  color: var(--mobius-teal);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn.primary {
+  background: var(--mobius-teal);
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: var(--mobius-navy);
+  transform: translateY(-1px);
+}
+
+.action-btn.secondary {
+  background: transparent;
+  color: var(--mobius-teal);
+  border: 1px solid var(--mobius-teal);
+}
+
+.action-btn.secondary:hover {
+  background: var(--mobius-light-teal);
+  transform: translateY(-1px);
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  color: var(--mobius-navy);
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--mobius-border);
+}
+
+.no-results p {
+  margin-bottom: 0.5rem;
+}
+
+.no-results p:first-child {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.no-results p:last-child {
+  opacity: 0.8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .search-container {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .search-box {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .search-button {
+    min-width: auto;
+  }
+  
+  .results {
+    padding: 1rem;
+  }
+  
+  .result-item {
+    padding: 1rem;
+  }
+}

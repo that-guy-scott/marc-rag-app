@@ -1,0 +1,62 @@
+/* Global styles - Apple-inspired design */
+:root {
+  /* MOBIUS Brand Colors - Apple Style */
+  --mobius-teal: #20B2AA;
+  --mobius-navy: #1E3A8A;
+  --mobius-accent: #007AFF; /* Apple blue for accents */
+  
+  /* Apple-style grays */
+  --gray-50: #FAFAFA;
+  --gray-100: #F5F5F7;
+  --gray-200: #E8E8ED;
+  --gray-300: #D2D2D7;
+  --gray-400: #86868B;
+  --gray-500: #515154;
+  --gray-600: #424245;
+  --gray-700: #2C2C2E;
+  --gray-800: #1C1C1E;
+  --gray-900: #000000;
+  
+  /* Semantic colors */
+  --background: var(--gray-100);
+  --background-secondary: var(--gray-50);
+  --background-card: #FFFFFF;
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-500);
+  --text-tertiary: var(--gray-400);
+  --border: var(--gray-200);
+  --border-hover: var(--gray-300);
+  
+  /* Apple spacing system */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: 16px;
+}

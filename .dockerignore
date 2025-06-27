@@ -1,0 +1,48 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+frontend/dist/
+backend/dist/
+
+# Development files
+.git/
+.gitignore
+README.md
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Test files
+**/*.test.js
+**/*.spec.js
+coverage/
+
+# MARC data file (too large for container)
+marc.mrc
+
+# Documentation
+project-analysis.md
+CLAUDE.md
+prompt.md

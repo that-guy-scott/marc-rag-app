@@ -1,0 +1,194 @@
+<div class="item-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading item details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error">
+    <h2>Error Loading Item</h2>
+    <p>{{ error }}</p>
+    <button class="btn primary" (click)="goBack()">Back to Search</button>
+  </div>
+
+  <!-- Item Detail -->
+  <div *ngIf="item && !isLoading" class="item-detail">
+    <!-- Header Section -->
+    <div class="item-header">
+      <button class="back-btn" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Back to Search
+      </button>
+      
+      <div class="item-main">
+        <div class="item-cover">
+          <div class="book-placeholder-large">
+            <span class="book-icon"><i class="fas fa-book"></i></span>
+          </div>
+        </div>
+        
+        <div class="item-info">
+          <h1 class="item-title">{{ item.title }}</h1>
+          <h2 class="item-subtitle" *ngIf="item.subtitle">{{ item.subtitle }}</h2>
+          <p class="item-author" *ngIf="item.author">by {{ item.author }}</p>
+          
+          <div class="item-meta">
+            <div class="meta-item" *ngIf="item.publisher">
+              <span class="label">Publisher:</span> {{ item.publisher }}
+            </div>
+            <div class="meta-item" *ngIf="item.year">
+              <span class="label">Year:</span> {{ item.year }}
+            </div>
+            <div class="meta-item" *ngIf="item.format">
+              <span class="label">Format:</span> {{ item.format }}
+            </div>
+            <div class="meta-item" *ngIf="item.language">
+              <span class="label">Language:</span> {{ item.language }}
+            </div>
+          </div>
+
+          <div class="availability-section">
+            <div class="availability" [class.available]="item.availability === 'Available'">
+              <span class="status-icon"><i class="fas" [ngClass]="item.availability === 'Available' ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i></span>
+              {{ item.availability || 'Status Unknown' }}
+            </div>
+            <div class="location" *ngIf="item.location">
+              <span class="label">Location:</span> {{ item.location }}
+            </div>
+            <div class="call-number" *ngIf="item.callNumber">
+              <span class="label">Call Number:</span> {{ item.callNumber }}
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn primary">Request Item</button>
+            <button class="btn secondary" (click)="saveItem()">Save to List</button>
+            <button class="btn secondary" (click)="printItem()">Print</button>
+            <button class="btn secondary" (click)="shareItem()">Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-container">
+      <div class="tabs">
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')"
+        >
+          Overview
+        </button>
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'details'"
+          (click)="setActiveTab('details')"
+        >
+          Details
+        </button>
+        <button 
+          class="tab" 
+          [class.active]="activeTab === 'holdings'"
+          (click)="setActiveTab('holdings')"
+        >
+          Holdings
+        </button>
+      </div>
+
+      <div class="tab-content">
+        <!-- Overview Tab -->
+        <div *ngIf="activeTab === 'overview'" class="tab-panel">
+          <div class="description-section" *ngIf="item.description">
+            <h3>Description</h3>
+            <p class="description">{{ item.description }}</p>
+          </div>
+
+          <div class="subjects-section" *ngIf="item.subjects && item.subjects.length > 0">
+            <h3>Subjects</h3>
+            <div class="subjects-list">
+              <span class="subject-tag" *ngFor="let subject of item.subjects">
+                {{ subject }}
+              </span>
+            </div>
+          </div>
+
+          <div class="notes-section" *ngIf="item.notes">
+            <h3>Notes</h3>
+            <p class="notes">{{ item.notes }}</p>
+          </div>
+        </div>
+
+        <!-- Details Tab -->
+        <div *ngIf="activeTab === 'details'" class="tab-panel">
+          <h3>Full MARC Record</h3>
+          <div class="marc-details">
+            <div class="detail-row" *ngIf="item.isbn">
+              <span class="field-label">ISBN:</span>
+              <span class="field-value">{{ item.isbn }}</span>
+            </div>
+            <div class="detail-row" *ngIf="item.marcRecord">
+              <span class="field-label">MARC Record ID:</span>
+              <span class="field-value">{{ item.marcRecord }}</span>
+            </div>
+            <div class="detail-row" *ngIf="item.pages">
+              <span class="field-label">Pages:</span>
+              <span class="field-value">{{ item.pages }}</span>
+            </div>
+            <div class="detail-row" *ngIf="item.language">
+              <span class="field-label">Language:</span>
+              <span class="field-value">{{ item.language }}</span>
+            </div>
+            <div class="detail-row" *ngIf="item.format">
+              <span class="field-label">Format:</span>
+              <span class="field-value">{{ item.format }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Holdings Tab -->
+        <div *ngIf="activeTab === 'holdings'" class="tab-panel">
+          <h3>Library Holdings</h3>
+          <div class="holdings-table">
+            <div class="holdings-row header">
+              <span>Library</span>
+              <span>Location</span>
+              <span>Call Number</span>
+              <span>Status</span>
+            </div>
+            <div class="holdings-row">
+              <span>Main Library</span>
+              <span>{{ item.location || '3rd Floor' }}</span>
+              <span>{{ item.callNumber || 'Z665 .S64 2023' }}</span>
+              <span class="status available">{{ item.availability || 'Available' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Similar Items Section -->
+    <div class="similar-items-section" *ngIf="similarItems.length > 0">
+      <h3>You might also like</h3>
+      <div class="similar-items-grid">
+        <div 
+          class="similar-item" 
+          *ngFor="let similar of similarItems"
+          (click)="viewSimilarItem(similar.id)"
+        >
+          <div class="similar-cover">
+            <span class="book-icon"><i class="fas fa-book-open"></i></span>
+          </div>
+          <div class="similar-content">
+            <h4 class="similar-title">{{ similar.title }}</h4>
+            <p class="similar-author">{{ similar.author }}</p>
+            <p class="similar-year">{{ similar.year }}</p>
+            <div class="similarity-score">
+              {{ (similar.score * 100) | number:'1.0-0' }}% match
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,411 @@
+<div class="search-container">
+  <header class="header">
+    <img src="mobius-logo.png" alt="MOBIUS - Linking Libraries" class="logo">
+    <p>AI-Enhanced Library Search with Research Assistance</p>
+  </header>
+
+  <div class="search-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onInputChange()"
+        (keyup.enter)="onSearch()"
+        placeholder="Search MARC records with AI assistance..."
+        class="search-input"
+      />
+      <button 
+        (click)="onSearch()" 
+        [disabled]="isLoading || !searchQuery.trim()"
+        class="search-button"
+      >
+        <span *ngIf="!isLoading"><i class="fas fa-robot"></i> AI Search</span>
+        <span *ngIf="isLoading">
+          <div class="ai-spinner">
+            <div class="ai-spinner-ring"></div>
+            <div class="ai-spinner-dot"></div>
+          </div>
+          Analyzing...
+        </span>
+      </button>
+    </div>
+
+    <!-- Query Enhancement Display -->
+    <div *ngIf="queryEnhancement && !isLoading" class="query-enhancement">
+      <div class="enhancement-header">
+        <h4><i class="fas fa-search-plus"></i> Query Enhancement</h4>
+      </div>
+      <div class="enhancement-content">
+        <div *ngIf="queryEnhancement.expandedQuery !== queryEnhancement.originalQuery" class="enhanced-query">
+          <strong>Enhanced Query:</strong> {{ queryEnhancement.expandedQuery }}
+        </div>
+        <div *ngIf="queryEnhancement.relatedTerms?.length > 0" class="related-terms">
+          <strong>Related Terms:</strong>
+          <span class="term-tag" *ngFor="let term of queryEnhancement.relatedTerms.slice(0, 5)">
+            {{ term }}
+          </span>
+        </div>
+        <div *ngIf="queryEnhancement.subjectHeadings?.length > 0" class="subject-headings">
+          <strong>Subject Headings:</strong>
+          <span class="subject-tag" *ngFor="let heading of queryEnhancement.subjectHeadings.slice(0, 3)">
+            {{ heading }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section with Tabs -->
+  <div class="results-section" *ngIf="searchResults.length > 0 || isLoading || showAdvancedFeatures">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p><i class="fas fa-robot"></i> AI is analyzing your search and finding relevant resources...</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div *ngIf="!isLoading && showAdvancedFeatures" class="tab-navigation">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'results'"
+        (click)="setActiveTab('results')"
+      >
+        <i class="fas fa-books"></i> Results ({{ searchResults.length }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'insights'"
+        (click)="setActiveTab('insights')"
+        *ngIf="aiInsights"
+      >
+        <i class="fas fa-brain"></i> AI Insights
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'recommendations'"
+        (click)="setActiveTab('recommendations')"
+        *ngIf="recommendations"
+      >
+        <i class="fas fa-lightbulb"></i> Recommendations
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'citations'"
+        (click)="setActiveTab('citations')"
+        *ngIf="citations && (citations.apa?.length > 0 || citations.mla?.length > 0)"
+      >
+        <i class="fas fa-quote-left"></i> Citations
+      </button>
+    </div>
+
+    <!-- Results Tab -->
+    <div *ngIf="!isLoading && searchResults.length > 0 && activeTab === 'results'" class="results">
+      <div class="results-header">
+        <h2>Search Results</h2>
+        <div class="results-controls">
+          <div class="sort-controls">
+            <label for="sortBy" class="sort-label">Sort by:</label>
+            <select 
+              id="sortBy" 
+              [(ngModel)]="selectedSortBy" 
+              (change)="onSortChange()"
+              class="sort-dropdown"
+            >
+              <option value="best_match">Best Match</option>
+              <option value="quality">Quality</option>
+              <option value="relevance">Relevance</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title_az">Title A-Z</option>
+              <option value="author_az">Author A-Z</option>
+            </select>
+          </div>
+          <div class="results-actions">
+            <button class="action-btn secondary" (click)="toggleCitations()" *ngIf="citations && (citations.apa?.length > 0 || citations.mla?.length > 0)">
+              {{ showCitations ? 'Hide Citations' : 'Show Citations' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-item" *ngFor="let result of searchResults">
+        <div class="result-header">
+          <div class="result-thumbnail">
+            <div class="book-placeholder">
+              <span class="book-icon"><i class="fas fa-book"></i></span>
+            </div>
+          </div>
+          <div class="result-content">
+            <div class="result-meta-info">
+              <!-- Quality and Reading Level Indicators -->
+              <div class="result-indicators" *ngIf="result.augmentation">
+                <span 
+                  class="quality-badge" 
+                  [ngClass]="getQualityClass(result.augmentation.qualityIndicators?.score || 0.5)"
+                  *ngIf="result.augmentation.qualityIndicators"
+                >
+                  Quality: {{ (result.augmentation.qualityIndicators.score * 100) | number:'1.0-0' }}%
+                </span>
+                <span 
+                  class="reading-level-badge" 
+                  [ngClass]="getReadingLevelClass(result.augmentation.readingLevel?.primary || 'intermediate')"
+                  *ngIf="result.augmentation.readingLevel"
+                >
+                  {{ result.augmentation.readingLevel.primary | titlecase }}
+                </span>
+                <span class="relevance-badge">
+                  Relevance: {{ (result.score * 100) | number:'1.1-1' }}%
+                </span>
+              </div>
+            </div>
+
+            <h3 (click)="viewItemDetail(result.id || result.marcRecord)" 
+                [title]="'View details for: ' + result.title">
+              {{ result.title || 'Untitled Record' }}
+            </h3>
+            
+            <p class="author" *ngIf="result.author">
+              <span class="label">Author:</span> {{ result.author }}
+            </p>
+            
+            <p class="publication-info">
+              <span *ngIf="result.publisher" class="publisher">
+                <span class="label">Publisher:</span> {{ result.publisher }}
+              </span>
+              <span *ngIf="result.publisher && result.year" class="separator"> • </span>
+              <span *ngIf="result.year" class="year">
+                <span class="label">Year:</span> {{ result.year }}
+              </span>
+            </p>
+
+            <!-- AI Insights for this result -->
+            <div *ngIf="result.augmentation?.aiInsights" class="result-ai-insights">
+              <div class="ai-insight-summary">
+                <strong><i class="fas fa-robot"></i> AI Analysis:</strong> {{ result.augmentation.aiInsights.contentSummary }}
+              </div>
+              <div *ngIf="result.augmentation.aiInsights.recommendedFor" class="recommended-for">
+                <strong><i class="fas fa-users"></i> Best for:</strong> {{ result.augmentation.aiInsights.recommendedFor }}
+              </div>
+            </div>
+
+            <div class="subjects" *ngIf="result.subjects && result.subjects.length > 0">
+              <span class="label">Subjects:</span>
+              <span class="subject-tag" *ngFor="let subject of result.subjects.slice(0, 3)">
+                {{ subject }}
+              </span>
+              <span *ngIf="result.subjects.length > 3" class="more-subjects">
+                +{{ result.subjects.length - 3 }} more
+              </span>
+            </div>
+
+            <p class="description" *ngIf="result.description">
+              <span class="label">Description:</span>
+              {{ result.description.length > 200 ? (result.description | slice:0:200) + '...' : result.description }}
+            </p>
+
+            <!-- Usage Recommendations -->
+            <div *ngIf="result.augmentation?.usageRecommendations?.length > 0" class="usage-recommendations">
+              <span class="label"><i class="fas fa-lightbulb"></i> Usage Tips:</span>
+              <ul class="recommendation-list">
+                <li *ngFor="let rec of result.augmentation.usageRecommendations.slice(0, 2)">{{ rec }}</li>
+              </ul>
+            </div>
+
+            <div class="result-footer">
+              <div class="result-actions">
+                <button class="action-btn primary" (click)="viewItemDetail(result.id || result.marcRecord)">
+                  View Details
+                </button>
+                <button class="action-btn secondary" (click)="saveItem(result)">
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Insights Tab -->
+    <div *ngIf="!isLoading && activeTab === 'insights' && aiInsights" class="ai-insights-tab">
+      <div class="insights-container">
+        <h2><i class="fas fa-brain"></i> AI Research Insights</h2>
+        
+        <div class="insight-section">
+          <h3><i class="fas fa-clipboard-list"></i> Summary</h3>
+          <p class="insight-text">{{ aiInsights.summary }}</p>
+        </div>
+
+        <div class="insight-section" *ngIf="aiInsights.keyTopics?.length > 0">
+          <h3><i class="fas fa-bullseye"></i> Key Topics</h3>
+          <div class="topic-tags">
+            <span class="topic-tag" *ngFor="let topic of aiInsights.keyTopics">{{ topic }}</span>
+          </div>
+        </div>
+
+        <div class="insight-section" *ngIf="aiInsights.keyAuthors?.length > 0">
+          <h3><i class="fas fa-user-graduate"></i> Key Authors</h3>
+          <div class="author-tags">
+            <span class="author-tag" *ngFor="let author of aiInsights.keyAuthors">{{ author }}</span>
+          </div>
+        </div>
+
+        <div class="insight-section" *ngIf="aiInsights.researchStrategy">
+          <h3><i class="fas fa-chess"></i> Research Strategy</h3>
+          <p class="insight-text">{{ aiInsights.researchStrategy }}</p>
+        </div>
+
+        <div class="insight-section" *ngIf="aiInsights.nextSteps?.length > 0">
+          <h3><i class="fas fa-step-forward"></i> Next Steps</h3>
+          <ul class="next-steps-list">
+            <li *ngFor="let step of aiInsights.nextSteps">{{ step }}</li>
+          </ul>
+        </div>
+
+        <div class="insight-section" *ngIf="aiInsights.methodology">
+          <h3><i class="fas fa-microscope"></i> Methodology Guidance</h3>
+          <p class="insight-text">{{ aiInsights.methodology }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations Tab -->
+    <div *ngIf="!isLoading && activeTab === 'recommendations' && recommendations" class="recommendations-tab">
+      <div class="recommendations-container">
+        <h2><i class="fas fa-lightbulb"></i> Research Recommendations</h2>
+
+        <div class="recommendation-section" *ngIf="recommendations.relatedQueries?.length > 0">
+          <h3><i class="fas fa-search"></i> Related Searches</h3>
+          <div class="related-queries">
+            <button 
+              class="query-suggestion" 
+              *ngFor="let query of recommendations.relatedQueries.slice(0, 8)"
+              (click)="searchRelatedQuery(query)"
+            >
+              {{ query }}
+            </button>
+          </div>
+        </div>
+
+        <div class="recommendation-section" *ngIf="recommendations.topicExpansion">
+          <h3><i class="fas fa-expand-arrows-alt"></i> Topic Expansion</h3>
+          
+          <div *ngIf="recommendations.topicExpansion.broaderTopics?.length > 0" class="topic-group">
+            <h4><i class="fas fa-angle-double-up"></i> Broader Topics</h4>
+            <div class="topic-chips">
+              <span class="topic-chip broader" *ngFor="let topic of recommendations.topicExpansion.broaderTopics">
+                {{ topic }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="recommendations.topicExpansion.narrowerTopics?.length > 0" class="topic-group">
+            <h4><i class="fas fa-angle-double-down"></i> More Specific Topics</h4>
+            <div class="topic-chips">
+              <span class="topic-chip narrower" *ngFor="let topic of recommendations.topicExpansion.narrowerTopics">
+                {{ topic }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="recommendations.topicExpansion.relatedFields?.length > 0" class="topic-group">
+            <h4><i class="fas fa-link"></i> Related Fields</h4>
+            <div class="topic-chips">
+              <span class="topic-chip related" *ngFor="let field of recommendations.topicExpansion.relatedFields">
+                {{ field }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="recommendation-section" *ngIf="recommendations.sourceDiversification">
+          <h3><i class="fas fa-book-open"></i> Source Diversification</h3>
+          <div *ngIf="recommendations.sourceDiversification.recommendations?.length > 0">
+            <ul class="diversification-list">
+              <li *ngFor="let rec of recommendations.sourceDiversification.recommendations">{{ rec }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="recommendation-section" *ngIf="recommendations.nextSteps">
+          <h3><i class="fas fa-tasks"></i> Recommended Next Steps</h3>
+          
+          <div *ngIf="recommendations.nextSteps.immediate?.length > 0" class="steps-group">
+            <h4><i class="fas fa-rocket"></i> Immediate Actions</h4>
+            <ul class="steps-list immediate">
+              <li *ngFor="let step of recommendations.nextSteps.immediate">{{ step }}</li>
+            </ul>
+          </div>
+
+          <div *ngIf="recommendations.nextSteps.shortTerm?.length > 0" class="steps-group">
+            <h4><i class="fas fa-calendar-alt"></i> Short-term Goals</h4>
+            <ul class="steps-list short-term">
+              <li *ngFor="let step of recommendations.nextSteps.shortTerm">{{ step }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Citations Tab -->
+    <div *ngIf="!isLoading && activeTab === 'citations' && citations" class="citations-tab">
+      <div class="citations-container">
+        <h2><i class="fas fa-quote-left"></i> Generated Citations</h2>
+        
+        <div *ngIf="citations.apa?.length > 0" class="citation-format">
+          <h3>APA Format</h3>
+          <div class="citation-list">
+            <div class="citation-item" *ngFor="let citation of citations.apa">
+              <p class="citation-text">{{ citation }}</p>
+              <button class="copy-btn" (click)="copyToClipboard(citation)"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="citations.mla?.length > 0" class="citation-format">
+          <h3>MLA Format</h3>
+          <div class="citation-list">
+            <div class="citation-item" *ngFor="let citation of citations.mla">
+              <p class="citation-text">{{ citation }}</p>
+              <button class="copy-btn" (click)="copyToClipboard(citation)"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="(!citations.apa || citations.apa.length === 0) && (!citations.mla || citations.mla.length === 0)" class="no-citations">
+          <p>No citations available for current results.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="!isLoading && searchResults.length === 0 && searchQuery && activeTab === 'results'" class="no-results">
+      <div class="no-results-content">
+        <h3><i class="fas fa-search"></i> No results found</h3>
+        <p>No results found for "<strong>{{ searchQuery }}</strong>"</p>
+        
+        <div *ngIf="recommendations?.relatedQueries?.length > 0" class="suggested-searches">
+          <h4><i class="fas fa-lightbulb"></i> Try these related searches:</h4>
+          <div class="suggestion-buttons">
+            <button 
+              class="suggestion-btn" 
+              *ngFor="let query of recommendations.relatedQueries.slice(0, 4)"
+              (click)="searchRelatedQuery(query)"
+            >
+              {{ query }}
+            </button>
+          </div>
+        </div>
+        
+        <div class="search-tips">
+          <h4><i class="fas fa-bullseye"></i> Search Tips:</h4>
+          <ul>
+            <li>Try broader or different keywords</li>
+            <li>Check spelling and try alternative terms</li>
+            <li>Use specific subject terms or author names</li>
+            <li>Consider synonyms or related concepts</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
